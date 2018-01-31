@@ -49,7 +49,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
       if (!markets[market]) {
         markets[market] = [];
       }
-      
+
       counter += 1;
       markets[market].push(ticker);
     }
@@ -61,8 +61,6 @@ const getMarkets = () => new Promise((resolve, reject) => {
   });
 
 });
-
-
 
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
   
