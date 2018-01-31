@@ -5,11 +5,13 @@
 const EventEmitter = require('events');
 const request = require('request');
 const config = require('config');
-const debug = require('debug')('exchanges:hitbtc');
+const debug = require('debug')('cointrage:order_book:hitbtc');
 
 const API_URL = 'https://api.hitbtc.com/api/1';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
+
+const MARKETS = ['ETH', 'BTC', 'USDT'];
 
 const parseMarketName = (str) => {
   const groups = str.match(/(\w+)(\w{3,3})/);
@@ -38,6 +40,10 @@ const getMarkets = () => new Promise((resolve, reject) => {
     let counter = 0;
     for (let mt in body) {
       let [market, ticker] = parseMarketName(mt);
+      if (MARKETS.indexOf(market) === -1) {
+        continue;
+      }
+
       let d = body[mt];
 
       if (!markets[market]) {
