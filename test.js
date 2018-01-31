@@ -1,4 +1,4 @@
-const book = require('./exchanges/poloniex');
+const book = require('./exchanges/gemini');
 const beep = require('beeper');
 
 book
