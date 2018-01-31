@@ -1,5 +1,5 @@
 
-const book = require('./orderbooks/hitbtc');
+const book = require('./exchanges/hitbtc');
 const beep = require('beeper');
 
 book
