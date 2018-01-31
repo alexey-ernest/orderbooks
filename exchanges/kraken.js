@@ -78,8 +78,8 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
     const mapOrder = (o) => {
         return {
-            rate: o[0],
-            quantity: o[1]
+            rate: Number(o[0]),
+            quantity: Number(o[1])
         };
     };
 
