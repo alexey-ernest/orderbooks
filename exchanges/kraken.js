@@ -11,7 +11,7 @@ const API_URL = 'https://api.kraken.com/0/public';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'ETC', 'XBT', 'BCH', 'USDT'];
+const MARKETS = ['ETH', 'XBT', 'USDT'];
 
 const parseMarketName = (str) => {
     const groups = str.match(/(\w+)(\w{3,3})/);
@@ -63,9 +63,16 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
 });
 
+const parseMarket = (market) => {
+    if (market === 'XBT') {
+        return 'BTC';
+    }
+    return market;
+};
+
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
-    const marketTicker = ticker + market;
+    let marketTicker = ticker + market;
     const url = `${API_URL}/Depth?pair=${marketTicker}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
@@ -91,6 +98,8 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
             return reject(`Invalid response: ${JSON.stringify(body)}`);
         }
 
+        market = parseMarket(market);
+
         // formatting response
         const res = {
             market: market,
@@ -102,6 +111,8 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
         resolve(res);
     });
 });
+
+
 
 class KrakenOrderBook extends EventEmitter {
 
@@ -158,6 +169,8 @@ class KrakenOrderBook extends EventEmitter {
                             })
                             .catch((err) => {
                                 handleError(err);
+
+                                market = parseMarket(market);
 
                                 if (!book[market]) {
                                     book[market] = {};
