@@ -112,8 +112,6 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
     });
 });
 
-
-
 class KrakenOrderBook extends EventEmitter {
 
     constructor() {
@@ -157,30 +155,31 @@ class KrakenOrderBook extends EventEmitter {
                 for (let t of markets[m]) {
 
                     (function (market, ticker) {
+                        setTimeout(() => {
+                            getOrderBook(market, ticker)
+                                .then((b) => {
+                                    if (!book[b.market]) {
+                                        book[b.market] = {};
+                                    }
 
-                        getOrderBook(market, ticker)
-                            .then((b) => {
-                                if (!book[b.market]) {
-                                    book[b.market] = {};
-                                }
+                                    book[b.market][b.ticker] = b;
+                                    self.emit('update', book, b.market, b.ticker);
+                                })
+                                .catch((err) => {
+                                    handleError(err);
 
-                                book[b.market][b.ticker] = b;
-                                self.emit('update', book, b.market, b.ticker);
-                            })
-                            .catch((err) => {
-                                handleError(err);
+                                    market = parseMarket(market);
 
-                                market = parseMarket(market);
+                                    if (!book[market]) {
+                                        book[market] = {};
+                                    }
 
-                                if (!book[market]) {
-                                    book[market] = {};
-                                }
+                                    book[market][ticker] = null;
 
-                                book[market][ticker] = null;
-
-                                // notifying about market removal
-                                self.emit('update', book, market, ticker);
-                            });
+                                    // notifying about market removal
+                                    self.emit('update', book, market, ticker);
+                                });
+                        }, counter * 50);
 
                     })(m, t);
 
