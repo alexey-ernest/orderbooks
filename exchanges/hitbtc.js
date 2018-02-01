@@ -102,8 +102,6 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
   });
 });
 
-
-
 class HitBtcOrderBook extends EventEmitter {
 
   constructor() {
