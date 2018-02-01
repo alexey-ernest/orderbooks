@@ -13,11 +13,11 @@ const API_URL = 'https://api.gemini.com/v1';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'BTC', 'USDT'];
+const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
     const groups = str.match(/(\w+)(\w{3,3})/);
-    return [groups[1].toUpperCase(), groups[2].toUpperCase()];
+    return [groups[2].toUpperCase(), groups[1].toUpperCase()];
 };
 
 const getMarkets = () => new Promise((resolve, reject) => {
@@ -68,7 +68,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
-    let marketTicker = market + ticker;
+    let marketTicker = ticker + market;
     const url = `${API_URL}/book/${marketTicker}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
