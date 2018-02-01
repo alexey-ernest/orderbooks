@@ -15,7 +15,7 @@ const API_BOOK_LEVEL = 2;
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'BTC', 'USDT'];
+const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const getMarkets = () => new Promise((resolve, reject) => {
 
@@ -42,8 +42,8 @@ const getMarkets = () => new Promise((resolve, reject) => {
         let counter = 0;
 
         for (let mt of body) {
-            let market = mt.base_currency,
-                ticker = mt.quote_currency;
+            let market = mt.quote_currency,
+                ticker = mt.base_currency;
 
             if (MARKETS.indexOf(market) === -1) {
                 continue;
@@ -67,7 +67,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
-    let marketTicker = `${market}-${ticker}`;
+    let marketTicker = `${ticker}-${market}`;
     const url = `${API_URL}/products/${marketTicker}/book?level=${API_BOOK_LEVEL}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
