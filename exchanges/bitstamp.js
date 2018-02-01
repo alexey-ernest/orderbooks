@@ -12,11 +12,11 @@ const API_URL = 'https://www.bitstamp.net/api/v2';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'BTC', 'USDT'];
+const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
     const groups = str.split('/');
-    return [groups[0], groups[1]];
+    return [groups[1], groups[0]];
 };
 
 const getMarkets = () => new Promise((resolve, reject) => {
@@ -66,7 +66,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
 const getOrderBook = (market, ticker, urlSymbol) => new Promise((resolve, reject) => {
 
-    let marketTicker = ticker + market;
+    let marketTicker = market + ticker;
     const url = `${API_URL}/order_book/${urlSymbol}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
