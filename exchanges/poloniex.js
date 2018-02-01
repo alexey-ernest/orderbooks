@@ -12,7 +12,7 @@ const API_RESULTS_DEPTH = 50;
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'BTC', 'USDT'];
+const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
     const groups = str.split('_');

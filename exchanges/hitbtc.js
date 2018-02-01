@@ -11,7 +11,7 @@ const API_URL = 'https://api.hitbtc.com/api/1';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'BTC', 'USDT'];
+const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
   const groups = str.match(/(\w+)(\w{3,3})/);

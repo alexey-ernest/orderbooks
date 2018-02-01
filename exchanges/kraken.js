@@ -11,7 +11,7 @@ const API_URL = 'https://api.kraken.com/0/public';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
-const MARKETS = ['ETH', 'XBT', 'USDT'];
+const MARKETS = ['ETH', 'XBT', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
     const groups = str.match(/(\w+)(\w{3,3})/);
