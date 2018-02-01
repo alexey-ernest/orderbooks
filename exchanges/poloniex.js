@@ -72,7 +72,7 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
     const mapOrder = (o) => {
         return {
-            rate: o[0],
+            rate: Number(o[0]),
             quantity: o[1]
         };
     };
@@ -160,8 +160,6 @@ class PoloniexOrderBook extends EventEmitter {
                                 })
                                 .catch((err) => {
                                     handleError(err);
-
-                                    market = parseMarket(market);
 
                                     if (!book[market]) {
                                         book[market] = {};
