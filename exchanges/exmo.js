@@ -181,7 +181,7 @@ class ExmoOrderBook extends EventEmitter {
                                     // notifying about market removal
                                     self.emit('update', book, market, ticker);
                                 });
-                        }, counter * 250);
+                        }, counter * 500);
 
                     })(m, t);
 
