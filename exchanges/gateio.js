@@ -1,16 +1,13 @@
 /**
- * Exmo order book event emitter.
- *
- * The number of API requests is limited to 180 per/minute from one IP address or by a single user.
- *
+ * Gate.io order book event emitter.
  */
 
 const EventEmitter = require('events');
 const request = require('request');
 const config = require('config');
-const debug = require('debug')('cointrage:order_book:exmo');
+const debug = require('debug')('cointrage:order_book:gateio');
 
-const API_URL = 'https://api.exmo.com/v1';
+const API_URL = 'http://data.gate.io/api2/1';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
@@ -18,12 +15,12 @@ const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
     const groups = str.split('_');
-    return [groups[1], groups[0]];
+    return [groups[1].toUpperCase(), groups[0].toUpperCase()];
 };
 
 const getMarkets = () => new Promise((resolve, reject) => {
 
-    const url = `${API_URL}/pair_settings`;
+    const url = `${API_URL}/pairs`;
     debug(`Getting markets list from url ${url}...`);
 
     request({
@@ -42,7 +39,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
         const markets = {};
         let counter = 0;
 
-        for (let mt in body) {
+        for (let mt of body) {
             let [market, ticker] = parseMarketName(mt);
 
             if (MARKETS.indexOf(market) === -1) {
@@ -68,13 +65,13 @@ const getMarkets = () => new Promise((resolve, reject) => {
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
     let marketTicker = market + ticker;
-    const url = `${API_URL}/order_book/?pair=${ticker}_${market}`;
+    const url = `${API_URL}/orderBook/${ticker}_${market}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
     const mapOrder = (o) => {
         return {
-            rate: Number(o[0]),
-            quantity: Number(o[1])
+            rate: o[0],
+            quantity: o[1]
         };
     };
 
@@ -93,24 +90,19 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
             return reject(`Invalid response: ${JSON.stringify(body)}`);
         }
 
-        let data = body[`${ticker}_${market}`];
-        if (!data) {
-            return reject(`Invalid response: ${JSON.stringify(body)}`);
-        }
-
         // formatting response
         const res = {
             market: market,
             ticker: ticker,
-            asks: data.ask.map(mapOrder),
-            bids: data.bid.map(mapOrder)
-    };
+            asks: body.asks.map(mapOrder),
+            bids: body.bids.map(mapOrder)
+        };
 
         resolve(res);
     });
 });
 
-class ExmoOrderBook extends EventEmitter {
+class GateIOOrderBook extends EventEmitter {
 
     constructor() {
         super();
@@ -175,7 +167,7 @@ class ExmoOrderBook extends EventEmitter {
                                     // notifying about market removal
                                     self.emit('update', book, market, ticker);
                                 });
-                        }, counter * 500);
+                        }, counter * 50);
 
                     })(m, t);
 
@@ -190,7 +182,9 @@ class ExmoOrderBook extends EventEmitter {
 
         // refreshing order books
         refreshOrderbooks();
+
     }
+
 };
 
-module.exports = new ExmoOrderBook();
+module.exports = new GateIOOrderBook();
