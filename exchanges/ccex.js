@@ -93,8 +93,8 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
         const res = {
             market: market,
             ticker: ticker,
-            asks: body.result.sell.map(mapOrder),
-            bids: body.result.buy.map(mapOrder)
+            asks: body.result.sell ? body.result.sell.map(mapOrder) : [],
+            bids: body.result.buy ? body.result.buy.map(mapOrder) : []
         };
 
         resolve(res);
