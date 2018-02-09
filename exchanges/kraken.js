@@ -14,8 +14,11 @@ const BOOKS_REFRSH_INTERVAL = 30000;
 const MARKETS = ['ETH', 'XBT', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
-    const groups = str.match(/(\w+)(\w{3,3})/);
-    return [groups[2], groups[1]];
+    const market = MARKETS.filter((o) => {
+        return (str.substr(str.length - o.length).toUpperCase() === o);
+    }).toString();
+
+    return [market , str.slice(0, -market.length).toUpperCase()];
 };
 
 const getMarkets = () => new Promise((resolve, reject) => {

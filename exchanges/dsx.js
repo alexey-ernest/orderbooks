@@ -14,8 +14,11 @@ const BOOKS_REFRSH_INTERVAL = 30000;
 const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
 const parseMarketName = (str) => {
-    const groups = str.match(/(\w+)(\w{3,3})/);
-    return [groups[2].toUpperCase(), groups[1].toUpperCase()];
+    const market = MARKETS.filter((o) => {
+        return (str.substr(str.length - o.length).toUpperCase() === o);
+    }).toString();
+
+    return [market , str.slice(0, -market.length).toUpperCase()];
 };
 
 const getMarkets = () => new Promise((resolve, reject) => {
@@ -45,6 +48,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
         for (let mt in body.pairs) {
             let [market, ticker] = parseMarketName(mt);
+            // debug([market, ticker]);
 
             if (MARKETS.indexOf(market) === -1) {
                 continue;
@@ -132,6 +136,7 @@ class DSXOrderBook extends EventEmitter {
             getMarkets()
                 .then((m) => {
                     markets = m;
+                    debug(m);
                 })
                 .catch(handleError)
                 .then(() => setTimeout(refreshMarkets, MARKETS_REFRESH_INTERVAL));
