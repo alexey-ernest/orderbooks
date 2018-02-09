@@ -48,7 +48,6 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
         for (let mt in body.pairs) {
             let [market, ticker] = parseMarketName(mt);
-            // debug([market, ticker]);
 
             if (MARKETS.indexOf(market) === -1) {
                 continue;
@@ -136,7 +135,6 @@ class DSXOrderBook extends EventEmitter {
             getMarkets()
                 .then((m) => {
                     markets = m;
-                    debug(m);
                 })
                 .catch(handleError)
                 .then(() => setTimeout(refreshMarkets, MARKETS_REFRESH_INTERVAL));
