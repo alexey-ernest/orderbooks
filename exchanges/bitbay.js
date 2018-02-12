@@ -1,25 +1,27 @@
 /**
- * Abucoins order book event emitter.
- *
- * 300 requests per 1 minute per IP and Account. When a rate limit is exceeded, a status of 429 will be returned.
- *
+ * Bitbay order book event emitter.
  */
 
 const EventEmitter = require('events');
 const request = require('request');
 const config = require('config');
-const debug = require('debug')('cointrage:order_book:abucoins');
+const debug = require('debug')('cointrage:order_book:bitbay');
 
-const API_URL = 'https://api.abucoins.com';
-const API_DEPTH_LEVEL = 2;
+const API_URL = 'https://bitbay.net/API/Public';
+const API_MARKETS_URL = 'https://api.bitbay.net/rest/trading/ticker';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
 const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
+const parseMarketName = (str) => {
+    const groups = str.split('-');
+    return [groups[1].toUpperCase(), groups[0].toUpperCase()];
+};
+
 const getMarkets = () => new Promise((resolve, reject) => {
 
-    const url = `${API_URL}/products`;
+    const url = `${API_MARKETS_URL}`;
     debug(`Getting markets list from url ${url}...`);
 
     request({
@@ -42,8 +44,8 @@ const getMarkets = () => new Promise((resolve, reject) => {
         const markets = {};
         let counter = 0;
 
-        for (let mt of body) {
-            let [market, ticker] = [mt.quote_currency, mt.base_currency];
+        for (let mt in body.items) {
+            let [market, ticker] = parseMarketName(mt);
             if (MARKETS.indexOf(market) === -1) {
                 continue;
             }
@@ -67,13 +69,13 @@ const getMarkets = () => new Promise((resolve, reject) => {
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
     let marketTicker = market + ticker;
-    const url = `${API_URL}/products/${ticker}-${market}/book?level=${API_DEPTH_LEVEL}`;
+    const url = `${API_URL}/${ticker}/${market}/orderbook.json`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
     const mapOrder = (o) => {
         return {
-            rate: Number(o[0]),
-            quantity: Number(o[1])
+            rate: o[0],
+            quantity: o[1]
         };
     };
 
@@ -96,15 +98,15 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
         const res = {
             market: market,
             ticker: ticker,
-            asks: body.asks.map(mapOrder),
-            bids: body.bids.map(mapOrder)
+            asks: body.bids ? body.bids.map(mapOrder) : [],
+            bids: body.asks ? body.asks.map(mapOrder) : []
         };
 
         resolve(res);
     });
 });
 
-class AbucoinsOrderBook extends EventEmitter {
+class BitbayOrderBook extends EventEmitter {
 
     constructor() {
         super();
@@ -189,4 +191,4 @@ class AbucoinsOrderBook extends EventEmitter {
 
 };
 
-module.exports = new AbucoinsOrderBook();
+module.exports = new BitbayOrderBook();

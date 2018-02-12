@@ -177,7 +177,7 @@ class GateIOOrderBook extends EventEmitter {
             }
 
             // schedule next update
-            setTimeout(refreshOrderbooks, BOOKS_REFRSH_INTERVAL)
+            setTimeout(refreshOrderbooks, BOOKS_REFRSH_INTERVAL);
         };
 
         // refreshing order books
