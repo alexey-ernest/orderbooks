@@ -165,7 +165,7 @@ class CossIOOrderBook extends EventEmitter {
                                     // notifying about market removal
                                     self.emit('update', book, market, ticker);
                                 });
-                        }, counter * 500);
+                        }, counter * 1000);
 
                     })(m, t);
 
@@ -175,7 +175,7 @@ class CossIOOrderBook extends EventEmitter {
             }
 
             // schedule next update
-            setTimeout(refreshOrderbooks, BOOKS_REFRSH_INTERVAL);
+            setTimeout(refreshOrderbooks, (counter * 1000) + 1000);
         };
 
         // refreshing order books
