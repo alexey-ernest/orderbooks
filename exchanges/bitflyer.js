@@ -80,9 +80,6 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
     request({
         uri: url,
-        headers: {
-            'User-Agent': 'request'
-        },
         json: true,
         method: 'GET'
     }, (err, response, body) => {
