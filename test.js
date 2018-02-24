@@ -1,4 +1,4 @@
-const book = require('./exchanges/zaif');
+const book = require('./exchanges/quadrigacx');
 const beep = require('beeper');
 
 book
