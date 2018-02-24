@@ -1,27 +1,74 @@
 /**
- * BTCC order book event emitter.
- *
- * DAX platform is closed, so we have only BTC/USD exchange.
- *
+ * Zaif order book event emitter.
  */
 
 const EventEmitter = require('events');
 const request = require('request');
 const config = require('config');
-const debug = require('debug')('cointrage:order_book:btcc');
+const debug = require('debug')('cointrage:order_book:zaif');
 
-const API_URL = 'https://spotusd-data.btcc.com';
+const API_URL = 'https://api.zaif.jp/api/1';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
 const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
-/////////////////////////
+const parseMarketName = (str) => {
+    const groups = str.split('_');
+    return [groups[1].toUpperCase(), groups[0].toUpperCase()];
+};
+
+const getMarkets = () => new Promise((resolve, reject) => {
+
+    const url = `${API_URL}/currency_pairs/all`;
+    debug(`Getting markets list from url ${url}...`);
+
+    request({
+        uri: url,
+        json: true,
+        method: 'GET'
+    }, (err, response, body) => {
+        if (err) return reject(err);
+
+        if (response.statusCode !== 200) {
+            // some other error
+            return reject(`Invalid status code received from url ${url}: ${response.statusCode}`);
+        }
+
+        if (!body) {
+            return reject(`Invalid response: ${JSON.stringify(body)}`);
+        }
+
+        // filtering active markets only
+        const markets = {};
+        let counter = 0;
+
+        for (let mt of body) {
+            let [market, ticker] = parseMarketName(mt.currency_pair);
+            if (MARKETS.indexOf(market) === -1) {
+                continue;
+            }
+
+            if (!markets[market]) {
+                markets[market] = [];
+            }
+
+            counter += 1;
+            markets[market].push(ticker);
+        }
+
+        debug(`Found ${counter} markets`);
+
+        resolve(markets);
+
+    });
+
+});
 
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
     let marketTicker = ticker + market;
-    const url = `${API_URL}/data/pro/orderbook?symbol=${ticker}${market}`;
+    const url = `${API_URL}/depth/${ticker.toLowerCase()}_${market.toLowerCase()}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 
     const mapOrder = (o) => {
@@ -58,9 +105,7 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
     });
 });
 
-
-
-class BTCCOrderBook extends EventEmitter {
+class ZaifOrderBook extends EventEmitter {
 
     constructor() {
         super();
@@ -75,7 +120,18 @@ class BTCCOrderBook extends EventEmitter {
             this.emit('error', err);
         };
 
-        let markets = { USD : ['BTC'] };
+        let markets = {};
+        const refreshMarkets = () => {
+            getMarkets()
+                .then((m) => {
+                    markets = m;
+                })
+                .catch(handleError)
+                .then(() => setTimeout(refreshMarkets, MARKETS_REFRESH_INTERVAL));
+        };
+
+        // refreshing markets
+        refreshMarkets();
 
         const refreshOrderbooks = () => {
 
@@ -114,7 +170,7 @@ class BTCCOrderBook extends EventEmitter {
                                     // notifying about market removal
                                     self.emit('update', book, market, ticker);
                                 });
-                        }, counter * 250);
+                        }, counter * 1000);
 
                     })(m, t);
 
@@ -134,4 +190,4 @@ class BTCCOrderBook extends EventEmitter {
 
 };
 
-module.exports = new BTCCOrderBook();
+module.exports = new ZaifOrderBook();

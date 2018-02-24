@@ -66,7 +66,7 @@ const getMarkets = () => new Promise((resolve, reject) => {
 
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
-    let marketTicker = market + ticker;
+    let marketTicker = ticker + market;
     const url = `${API_URL}/public/getorderbook?market=${ticker}_${market}&type=ALL&depth=${API_RESULTS_DEPTH}`;
     debug(`Getting order book for market ${marketTicker} from url ${url}...`);
 

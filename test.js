@@ -1,4 +1,4 @@
-const book = require('./exchanges/bitbay');
+const book = require('./exchanges/zaif');
 const beep = require('beeper');
 
 book
