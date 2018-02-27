@@ -1,4 +1,4 @@
-const book = require('./exchanges/quadrigacx');
+const book = require('./exchanges/triplediceexchange');
 const beep = require('beeper');
 
 book

@@ -25,6 +25,7 @@
     "async": "^2.6.0",
     "beeper": "^1.1.1",
     "cheerio": "^1.0.0-rc.2",
+    "cloudscraper": "^1.4.1",
     "config": "^1.29.2",
     "debug": "^3.0.1",
     "request": "^2.83.0"

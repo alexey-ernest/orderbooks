@@ -7,16 +7,62 @@
 
 const EventEmitter = require('events');
 const request = require('request');
+const cheerio = require('cheerio');
 const config = require('config');
 const debug = require('debug')('cointrage:order_book:btcc');
 
 const API_URL = 'https://spotusd-data.btcc.com';
+const MARKETS_URL = 'https://coinmarketcap.com/exchanges/btcc/';
 const MARKETS_REFRESH_INTERVAL = 30000;
 const BOOKS_REFRSH_INTERVAL = 30000;
 
 const MARKETS = ['ETH', 'BTC', 'USDT', 'USD'];
 
-/////////////////////////
+const parseMarketName = (str) => {
+    const groups = str.split('/');
+    return [groups[1], groups[0]];
+};
+
+const getMarkets = () => new Promise((resolve, reject) => {
+
+    const url = `${MARKETS_URL}`;
+    debug(`Getting markets list from url ${url}...`);
+
+    request(url, (err, response, html) => {
+        if (err) return reject(err);
+
+        if (response.statusCode !== 200) {
+            // some other error
+            return reject(`Invalid status code received from url ${url}: ${response.statusCode}`);
+        }
+
+        // filtering active markets only
+        const markets = {};
+        let counter = 0;
+
+        const _$ = cheerio.load(html);
+
+        _$('table#exchange-markets > tbody tr').each((i, row) => {
+            let mt  = _$(row).find('a').not('.market-name').text();
+            if (mt) {
+                let [market, ticker] = parseMarketName(mt);
+                if (MARKETS.indexOf(market) !== -1) {
+                    if (!markets[market]) {
+                        markets[market] = [];
+                    }
+
+                    counter += 1;
+                    markets[market].push(ticker);
+                }
+            }
+        });
+
+        debug(`Found ${counter} markets`);
+
+        resolve(markets);
+    });
+
+});
 
 const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
 
@@ -75,7 +121,18 @@ class BTCCOrderBook extends EventEmitter {
             this.emit('error', err);
         };
 
-        let markets = { USD : ['BTC'] };
+        let markets = {};
+        const refreshMarkets = () => {
+            getMarkets()
+                .then((m) => {
+                    markets = m;
+                })
+                .catch(handleError)
+                .then(() => setTimeout(refreshMarkets, MARKETS_REFRESH_INTERVAL));
+        };
+
+        // refreshing markets
+        refreshMarkets();
 
         const refreshOrderbooks = () => {
 
@@ -114,7 +171,7 @@ class BTCCOrderBook extends EventEmitter {
                                     // notifying about market removal
                                     self.emit('update', book, market, ticker);
                                 });
-                        }, counter * 250);
+                        }, counter * 500);
 
                     })(m, t);
 
