@@ -3,7 +3,7 @@
  */
 
 const EventEmitter = require('events');
-const request = require('request');
+const cloudscraper = require('cloudscraper');
 const config = require('config');
 const debug = require('debug')('cointrage:order_book:tradesatoshi');
 
@@ -24,10 +24,9 @@ const getMarkets = () => new Promise((resolve, reject) => {
     const url = `${API_URL}/public/getmarketsummaries`;
     debug(`Getting markets list from url ${url}...`);
 
-    request({
-        uri: url,
-        json: true,
-        method: 'GET'
+    cloudscraper.request({
+        method: 'GET',
+        url: url
     }, (err, response, body) => {
         if (err) return reject(err);
 
@@ -35,6 +34,8 @@ const getMarkets = () => new Promise((resolve, reject) => {
             // some other error
             return reject(`Invalid status code received from url ${url}: ${response.statusCode}`);
         }
+
+        body = JSON.parse(body);
 
         if (!body) {
             return reject(`Invalid response: ${JSON.stringify(body)}`);
@@ -82,9 +83,8 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
         };
     };
 
-    request({
-        uri: url,
-        json: true,
+    cloudscraper.request({
+        url: url,
         method: 'GET'
     }, (err, response, body) => {
         if (err) return reject(err);
@@ -92,6 +92,8 @@ const getOrderBook = (market, ticker) => new Promise((resolve, reject) => {
         if (response.statusCode !== 200) {
             return reject(`Invalid status code received from url ${url}: ${response.statusCode}`);
         }
+
+        body = JSON.parse(body);
 
         if (!body) {
             return reject(`Invalid response: ${JSON.stringify(body)}`);
