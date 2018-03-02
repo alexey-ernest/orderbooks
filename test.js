@@ -1,10 +1,10 @@
-const book = require('./exchanges/triplediceexchange');
+const book = require('./exchanges/tradesatoshi');
 const beep = require('beeper');
 
 book
   .on('update', (book, market, ticker) => {
-    console.log(market, ticker);
-    console.log(book[market][ticker]);
+    // console.log(market, ticker);
+    // console.log(book[market][ticker]);
   })
   .on('error', err => {
     if (err.code === 'ETIMEDOUT' || err.code === 'ENOTFOUND' || err.code === 'ECONNRESET') {
